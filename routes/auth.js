@@ -116,7 +116,7 @@ router.get('/callback', async function(req, res, next) {
 
   try {
     // Exchange auth code for access token
-    const tokenResponse = await fetch(
+    /*const tokenResponse = await fetch(
       `https://${shop}/admin/oauth/access_token`,
       {
         method: 'POST',
@@ -130,6 +130,27 @@ router.get('/callback', async function(req, res, next) {
     );
 
     if (!tokenResponse.ok) {
+      throw new Error(`Token exchange failed: ${tokenResponse.statusText}`);
+    }*/
+
+    const params = new URLSearchParams();
+    params.append("client_id", process.env.SHOPIFY_API_KEY);
+    params.append("client_secret", process.env.SHOPIFY_API_SECRET);
+    params.append("code", code);
+
+    const tokenResponse = await fetch(
+        `https://${shop}/admin/oauth/access_token`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: params.toString(),
+        }
+    );
+
+    // Check status
+    if (!tokenResponse.ok) {
+      const text = await tokenResponse.text();
+      console.error("Token exchange error response:", text);
       throw new Error(`Token exchange failed: ${tokenResponse.statusText}`);
     }
 
