@@ -102,12 +102,12 @@ router.get('/callback', async function(req, res, next) {
     return res.status(403).send('HMAC validation failed - request may not be from Shopify');
   }*/
 
-  try {
+  /*try {
     await validShopifyRequest(process.env.SHOPIFY_API_SECRET, req.query);
   } catch (err) {
     console.error("HMAC validation failed:", err.message);
     return res.status(403).send("HMAC validation failed - request may not be from Shopify");
-  }
+  }*/
 
   // Clear the state from session after successful validation
   /*const validatedShop = req.session.shop;
