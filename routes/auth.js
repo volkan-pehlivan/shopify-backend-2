@@ -2,6 +2,7 @@ var express = require('express');
 var fetch = require('node-fetch');
 var crypto = require('crypto');
 var router = express.Router();
+const validShopifyRequest = require('valid-shopify-request');
 
 /**
  * Validates the HMAC signature from Shopify
@@ -96,15 +97,22 @@ router.get('/callback', async function(req, res, next) {
   }*/
 
   // Verify HMAC signature
-  if (!verifyHmac(req.query)) {
+  /*if (!verifyHmac(req.query)) {
     console.error('HMAC validation failed');
     return res.status(403).send('HMAC validation failed - request may not be from Shopify');
+  }*/
+
+  try {
+    await validShopifyRequest(process.env.SHOPIFY_API_SECRET, req.query);
+  } catch (err) {
+    console.error("HMAC validation failed:", err.message);
+    return res.status(403).send("HMAC validation failed - request may not be from Shopify");
   }
 
   // Clear the state from session after successful validation
-  const validatedShop = req.session.shop;
+  /*const validatedShop = req.session.shop;
   delete req.session.state;
-  delete req.session.shop;
+  delete req.session.shop;*/
 
   try {
     // Exchange auth code for access token
@@ -133,11 +141,12 @@ router.get('/callback', async function(req, res, next) {
     }
 
     // TODO: store accessToken in a database associated with the shop domain
-    console.log(`Access token received for shop: ${validatedShop}`);
-    console.log(`Access token: ${accessToken}`);
+    /*console.log(`Access token received for shop: ${validatedShop}`);
+    console.log(`Access token: ${accessToken}`);*/
 
     // Redirect to your frontend UI
-    res.redirect(`${process.env.FRONTEND_URL}/?shop=${validatedShop}`);
+    /*res.redirect(`${process.env.FRONTEND_URL}/?shop=${validatedShop}`);*/
+    res.redirect(`${process.env.FRONTEND_URL}/?shop=${shop}`);
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Authentication failed: ' + error.message);
